@@ -23,7 +23,7 @@ using namespace google::protobuf::compiler::objectivec;
 int main(int argc, char **argv)
 {
 	if (argc == 2 && strcmp(argv[1], "-version") == 0) {
-		std::cout << "1.1.1" << std::endl;
+		std::cout << "1.2.0" << std::endl;
 		exit(0);
 	}
 

@@ -56,8 +56,8 @@ namespace google { namespace protobuf { namespace compiler { namespace objective
 
       string filepath = FilePath(file);
 
-      // default: old way. Do not divide headers. User can set PROTOC_GEN_OBJC_DIVIDE_HEADERS in order to split headers
-      bool shouldDivideHeaders = ::getenv("PROTOC_GEN_OBJC_DIVIDE_HEADERS") != 0;
+      // default: old way. Do not divide files onto messages. User can set PROTOC_GEN_OBJC_SEPARATE_FILES_FOR_MESSAGE in order to split classes
+      bool shouldDivideHeaders = ::getenv("PROTOC_GEN_OBJC_SEPARATE_FILES_FOR_MESSAGE") != 0;
       if (shouldDivideHeaders) {
           string enumsHeaderName = filepath + ".enums.pb.h";
           string aggregateHeaderName = filepath + ".pb.h";
@@ -85,9 +85,18 @@ namespace google { namespace protobuf { namespace compiler { namespace objective
           // _Builder class forward declaration
           // Class interface
           // _Builder class interface
+          file_generator.GenerateHeaders(output_directory, ".pb.h", aggregateHeaderName);
+
+          // Generate m file with root class and enums file.
           {
-              file_generator.GenerateHeaders(output_directory, ".pb.h", aggregateHeaderName);
+              scoped_ptr<io::ZeroCopyOutputStream> output(output_directory->Open(filepath + ".pb.m"));
+              io::Printer printer(output.get(), '$');
+              file_generator.GenerateAggregateSource(&printer);
           }
+
+          // Generate m files with each message implementation in а separate file.
+          file_generator.GenerateSeparateSources(output_directory, ".pb.m", aggregateHeaderName);
+
       } else {
           
           // Generate header.
@@ -97,14 +106,14 @@ namespace google { namespace protobuf { namespace compiler { namespace objective
               io::Printer printer(output.get(), '$');
               file_generator.GenerateHeader(&printer);
           }
-      }
-      
-      // Generate m file.
-      {
-          scoped_ptr<io::ZeroCopyOutputStream> output(
-                                                      output_directory->Open(filepath + ".pb.m"));
-          io::Printer printer(output.get(), '$');
-          file_generator.GenerateSource(&printer);
+
+          // Generate m file.
+          {
+              scoped_ptr<io::ZeroCopyOutputStream> output(
+                                                          output_directory->Open(filepath + ".pb.m"));
+              io::Printer printer(output.get(), '$');
+              file_generator.GenerateSource(&printer);
+          }
       }
 
       return true;

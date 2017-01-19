@@ -47,7 +47,10 @@ class FileGenerator {
 
   void GenerateEnumsHeader(io::Printer* printer);
   void GenerateAggregateHeader(io::Printer* printer, string enumsHeaderName);
-  void GenerateHeaders(GeneratorContext* outputDirectory, string extension, string aggregateHeaderName);    
+  void GenerateHeaders(GeneratorContext* outputDirectory, string extension, string aggregateHeaderName);
+
+  void GenerateAggregateSource(io::Printer* printer);
+  void GenerateSeparateSources(GeneratorContext* outputDirectory, string extension, string aggregateHeaderName);
 
   const string& classname()    { return classname_;    }
 
